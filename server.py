@@ -16,7 +16,7 @@ class Client:
 
         self.username = "Anonymous"
         self.avatar = ""
-        self.prefix = f"[{self.id}]"
+        self.prefix = f"[{self.id}]:"
 
         print(f"client {self.id} connected")
 
@@ -27,18 +27,44 @@ class Client:
             while True:
                 d = shared.customRecv(self.sock)
 
+                if not d:
+                    break
+
                 match d["op"]:
                     case 0:
                         self.send_video()
                     case 2:
-                        pass
+                        self.auth(d["d"])
                     case _:
-                        shared.customSend(
-                            self.sock, {"op": 30, "d": f"unknown op {d['op']}"}
-                        )
-                        self.log("client send invalid data")
+                        self.send_error(f"unknown op {d['op']}")
         except JSONDecodeError:
-            self.log("disconnected")
+            self.log("invalid JSON payload")
+        except (ConnectionResetError, ConnectionAbortedError, OSError):
+            self.log("unexpected network disconnection")
+        except Exception as e:
+            self.log(f"error (disconnected): {e}")
+
+        self.log("connection loop end")
+
+    def auth(self, d: dict):
+        self.log("authorizing")
+
+        if not "username" in d:
+            self.send_error("invalid username (no username), auth failed")
+
+            return
+
+        if 3 > len(d["username"]) > 15:
+            self.send_error("invalid username (too short or too long), auth failed")
+
+            return
+
+        self.username = d["username"]
+        self.updatePrefix()
+
+    def send_error(self, msg: str):
+        shared.customSend(self.sock, {"op": 30, "d": "invalid username"})
+        self.log(f"error: {msg}")
 
     def send_video(self):
         size = os.path.getsize("server/video.mp4")
@@ -48,6 +74,10 @@ class Client:
 
         with open("server/video.mp4", "rb") as f:
             shared.customSendRaw(self.sock, f.read())
+
+    def updatePrefix(self):
+        self.prefix = f"[{self.id}] {self.username}:"
+        self.log("updated prefix")
 
     def log(self, text: str):
         print(f"{self.prefix} {text}")
