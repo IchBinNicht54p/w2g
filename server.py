@@ -62,6 +62,10 @@ class Client:
         self.username = d["username"]
         self.updatePrefix()
 
+        for client in server.clients:
+            shared.customSend(client.sock, {"op": 10, "d": {"username": self.username}})
+            self.log(f"broadcasted to {client.username} ({client.id}) server join")
+
     def send_error(self, msg: str):
         shared.customSend(self.sock, {"op": 30, "d": "invalid username"})
         self.log(f"error: {msg}")
