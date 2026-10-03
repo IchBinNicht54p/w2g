@@ -13,4 +13,15 @@ def load_script(script: str):
     return send_file(f"scripts/{script}", mimetype="application/javascript")
 
 
+@app.route("/files/<file>")
+def load_file(file: str):
+    match file.split(".")[1]:
+        case "mp4":
+            mimetype = "video/mp4"
+        case _:
+            mimetype = "text/plain"
+
+    return send_file(f"files/{file}", mimetype=mimetype)
+
+
 app.run(debug=True)
