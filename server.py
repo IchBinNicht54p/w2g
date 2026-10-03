@@ -65,8 +65,10 @@ class Server:
 
         try:
             while True:
+                self.clients.append(Client(self.sock.accept()))
+
                 Thread(
-                    target=Client(self.sock.accept()).handle,
+                    target=self.clients[-1].handle,
                     daemon=True,
                 ).start()
         except KeyboardInterrupt:
