@@ -4,48 +4,65 @@ import socket
 import typing
 from time import time
 from threading import Thread
-from json import dumps
+from json import JSONDecodeError, dumps
+
+
+class Client:
+    def __init__(self, d: tuple[socket.socket, typing.Any]):
+        self.sock = d[0]
+        self.id = f"{d[1][1]}:{d[1][1]}"
+
+        self.username = "Anonymous"
+        self.avatar = ""
+        self.prefix = f"[{self.id}]"
+
+        print(f"client {self.id} connected")
+
+    def handle(self):
+        self.log("handling client")
+
+        try:
+            while True:
+                d = shared.customRecv(self.sock)
+
+                match d["op"]:
+                    case 0:
+                        self.send_video()
+                    case 2:
+                        pass
+                    case _:
+                        shared.customSend(
+                            self.sock, {"op": 30, "d": f"unknown op {d['op']}"}
+                        )
+                        self.log("client send invalid data")
+        except JSONDecodeError:
+            self.log("disconnected")
+
+    def send_video(self):
+        size = os.path.getsize("server/video.mp4")
+        video = shared.Download("files/video.mp4", size)
+
+        shared.customSend(self.sock, {"op": 1, "d": dumps(video, default=vars)})
+
+        with open("server/video.mp4", "rb") as f:
+            shared.customSendRaw(self.sock, f.read())
+
+    def log(self, text: str):
+        print(f"{self.prefix} {text}")
 
 
 class Server:
     def __init__(self):
         self.sock = shared.W2gSocket("192.168.101.104", 25565)
-        self.clients: list[tuple[socket.socket, str]] = []
+        self.clients: list[Client] = []
 
         self.sock.initServer()
-
-    def handle(self, connection_data: tuple[socket.socket, typing.Any]):
-        id = str(connection_data[1][1])
-        print(f"client {id} {connection_data[1]} connected")
-
-        sock = connection_data[0]
-        self.clients.append((sock, id))
-
-        while True:
-            d = shared.customRecv(sock)
-
-            match d["op"]:
-                case 0:
-                    self.send_video(sock)
-                case _:
-                    shared.customSend(sock, {"op": 30, "d": f"unknown op {d['op']}"})
-                    print(f"client {id} send invalid data")
-
-    def send_video(self, sock: socket.socket):
-        size = os.path.getsize("server/video.mp4")
-        video = shared.Download("files/video.mp4", size)
-
-        shared.customSend(sock, {"op": 1, "d": dumps(video, default=vars)})
-
-        with open("server/video.mp4", "rb") as f:
-            shared.customSendRaw(sock, f.read())
 
     def listen(self):
         try:
             while True:
                 Thread(
-                    target=self.handle,
-                    args=(self.sock.accept(),),
+                    target=Client(self.sock.accept()).handle,
                     daemon=True,
                 ).start()
         except KeyboardInterrupt:
