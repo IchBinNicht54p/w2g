@@ -1,6 +1,7 @@
 import os
 import shared
 import socket
+import typing
 from time import time
 from threading import Thread
 from json import dumps
@@ -13,7 +14,7 @@ class Server:
 
         self.sock.initServer()
 
-    def handle(self, connection_data: tuple[socket.socket, socket._RetAddress]):
+    def handle(self, connection_data: tuple[socket.socket, typing.Any]):
         id = str(connection_data[1][1])
         print(f"client {id} {connection_data[1]} connected")
 

@@ -32,3 +32,4 @@ sock = shared.W2gSocket(input("ip: "), 25565)
 
 sock.initClient()
 ClientDownload(sock).startDownload()
+sock.close()

@@ -1,6 +1,7 @@
 import os
 import json
 import socket
+import typing
 
 
 class Download:
@@ -46,7 +47,7 @@ class W2gSocket:
     def listen(self):
         self.sock.listen(self.max_clients)
 
-    def accept(self) -> tuple[socket.socket, socket._RetAddress]:
+    def accept(self) -> tuple[socket.socket, typing.Any]:
         return self.sock.accept()
 
     def send(self, d: dict, log=True):
