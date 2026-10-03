@@ -33,6 +33,7 @@ class W2gSocket:
         if self.initialized:
             return False
 
+        self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.sock.bind((self.ip, self.port))
         self.listen()
         self.initialized = True
