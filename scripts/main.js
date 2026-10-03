@@ -16,14 +16,21 @@ connect_button.onclick = function () {
 
     if (!ip || !port) {
         alert("please input an ip and port")
+
+        return
     }
 
     try {
         ws = new WebSocket(`ws://${ip}:${port}`)
     } catch (e) {
         console.error(e)
+
         alert("An error occourred whilst connecting to the server, check the console")
+
+        return
     }
+
+    document.getElementById("connect").style.display = "none"
 
     ws.onopen = function (event) {
         console.log("Connected to the server")
