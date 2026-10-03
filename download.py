@@ -28,7 +28,7 @@ class ClientDownload:
         print("\ndownload complete")
 
 
-sock = shared.W2gSocket("192.168.101.104", 25565)
+sock = shared.W2gSocket(input("ip: "), 25565)
 
 sock.initClient()
 ClientDownload(sock).startDownload()
