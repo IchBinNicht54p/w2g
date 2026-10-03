@@ -1,4 +1,6 @@
+import asyncio
 import os
+import proxy
 import shared
 import socket
 import typing
@@ -10,7 +12,7 @@ from json import JSONDecodeError, dumps
 class Client:
     def __init__(self, d: tuple[socket.socket, typing.Any]):
         self.sock = d[0]
-        self.id = f"{d[1][1]}:{d[1][1]}"
+        self.id = f"{d[1][0]}:{d[1][1]}"
 
         self.username = "Anonymous"
         self.avatar = ""
@@ -59,6 +61,8 @@ class Server:
         self.sock.initServer()
 
     def listen(self):
+        print("TCP server running")
+
         try:
             while True:
                 Thread(
@@ -68,6 +72,8 @@ class Server:
         except KeyboardInterrupt:
             self.sock.close()
 
+
+Thread(target=asyncio.run, args=(proxy.main(),), daemon=True).start()
 
 server = Server()
 server.listen()
