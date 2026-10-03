@@ -15,7 +15,7 @@ class ClientDownload:
         size = 0
 
         while size < self.download.size:
-            d = self.sock.recv_raw(log=False)
+            d = self.sock.recv_raw(8192, log=False)
 
             self.download.write(d)
             size += len(d)
@@ -25,7 +25,7 @@ class ClientDownload:
                 end="\r",
             )
 
-        print("download complete")
+        print("\ndownload complete")
 
 
 sock = shared.W2gSocket("192.168.101.104", 25565)
