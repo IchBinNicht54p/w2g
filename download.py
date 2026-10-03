@@ -15,7 +15,7 @@ class ClientDownload:
         size = 0
 
         while size < self.download.size:
-            d = self.sock.recv_raw(65536, log=False)
+            d = self.sock.recv_raw(131072, log=False)
 
             self.download.write(d)
             size += len(d)
