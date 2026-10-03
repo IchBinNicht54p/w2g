@@ -21,7 +21,7 @@ class ClientDownload:
             size += len(d)
 
             print(
-                f"downloading file {(round((size / self.download.size) * 100, 2))}% {size}/{self.download.size}",
+                f"downloading file {(round((size / self.download.size) * 100))}% complete {round(size / 1000000)}MB/{round(self.download.size / 1000000)}MB",
                 end="\r",
             )
 
